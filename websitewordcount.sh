@@ -38,8 +38,19 @@ for word in $(cat wordlist.txt); do
 for file in $(cat pagelist.txt); do
 	lynx -dump -nolist  $file | grep -o -w $word | wc -w >> wordcount-$word.txt
 	paste pagelist.txt wordcount-$word.txt > plist-wcount-$word.txt
-	lineTotal=$(wc -l < plist-wcount-$word.txt) #>> urlcount-$word.txt	
 done
+
+urlnullCounter=0	
+for urlnullOrnot in $(cat wordcount-$word.txt); do
+	if (( $urlnullOrnot == 0 ))
+		then
+		urlnullCounter=$((urlnullCounter + 1))
+	fi
+done
+lineTotal=$(wc -l < plist-wcount-$word.txt) #>> urlcount-$word.txt	
+lineCounter=$((lineTotal - urlnullCounter))
+echo "lineTotal is $lineTotal .. lineCounter is $lineCounter "
+
 
 # need to count URLs with occurances, as-is outputs total urls checked .. for the future
 #lineTotal=0
@@ -52,14 +63,14 @@ echo "adding up totals...almost there..."
 wordTotal=0
 for t in $(cat wordcount-$word.txt); do
 	wordTotal=$((wordTotal + t))
-	echo "the total for $word is vtotal $wordTotal vt $t"
+#	echo "the total for $word is vtotal $wordTotal vt $t"
 done
 
 #echo "calculating  ... "
 #price=`echo "$total * $rate" | bc`
 
 # outputs counts to json file
-echo -e "\"$word\": {\n\"count\": $wordTotal,\n\"urls\": $lineTotal }" >> plist-wcount.txt
+echo -e "\"$word\": {\n\"count\": $wordTotal,\n\"urls\": $lineCounter }" >> plist-wcount.txt
 
 # closes loop for word, moves to next word
 done
